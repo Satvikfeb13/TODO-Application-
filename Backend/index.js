@@ -1,54 +1,62 @@
-const express=require("express");
-const connectDB=require("./config/database")
-const{createtodo,updatetodo}=require("./type")
-const{todo}=require("./db")
-const app=express()
+const express = require("express");
+const { createTodo, updateTodo } = require("./type");
+const { todo } = require("./db");
+// const cors = require("cors");
+const app = express();
+
 app.use(express.json());
-app.post("/todo",async(req,res)=>{
-    const createpayload=req.body;
-    const parsedpayload=createtodo.safeParse(createpayload);
-    if(!parsedpayload.success){
+// app.use(cors());
+
+app.post("/todo", async function(req, res) {
+    const createPayload = req.body;
+    const parsedPayload = createTodo.safeParse(createPayload);
+
+    if (!parsedPayload.success) {
         res.status(411).json({
-            mes:"You send wrong input "
+            msg: "You sent the wrong inputs",
         })
-        return ;
+        return;
     }
-    // put in todo 
- await todo.createtodo({
-    title:createpayload.title,
-    description:createpayload.description,
-    completed:false
-})
- res.json({
-    msg:"todo created"
- })
-})
-app.get("/todos",async(req,res)=>{
- 
-    const todos= await todo.find({})
+    // put it in mongodb
+    await todo.create({
+        title: createPayload.title,
+        description: createPayload.description,
+        completed: false
+    })
+
     res.json({
-        todos
+        msg: "Todo created"
+    })
+})
+
+app.get("/todos", async function(req, res) {
+    // const todos = await todo.find({});
+
+    res.json({
+        todos: []
     })
 
 })
-app.put("/completes",async(req,res)=>{
-    const updatepayload=req.body;
-    const parsedpayload=createtodo.safeParse(updatepayload);
-    if(!parsedpayload.success){
+
+app.put("/completed", async function(req, res) {
+    const updatePayload = req.body;
+    const parsedPayload = updateTodo.safeParse(updatePayload);
+    if (!parsedPayload.success) {
         res.status(411).json({
-            mes:"You send wrong input "
+            msg: "You sent the wrong inputs",
         })
-        return ;
+        return;
     }
+
     await todo.update({
-        _id:req.body.id
-    },{
-        completed:true
+        _id: req.body.id
+    }, {
+      completed: true  
     })
+
     res.json({
-        meg:"TODO marked as completed"
+        msg: "Todo marked as completed"
     })
-    
-    
 })
+
 app.listen(3000);
